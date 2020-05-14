@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using MongoDB.Entities;
 
 namespace WikiObjects.Data.Model
 {
-    public class Attachment : ACLObject
+    [Name("Attachment")]
+    public class AttachmentModel : ACLObject
     {
-        public Attachment(User owner) : base (owner) { }
+        public AttachmentModel(string ownerId) : base (ownerId) { }
 
         public string name { get; set; }
 

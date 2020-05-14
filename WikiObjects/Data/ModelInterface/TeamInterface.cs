@@ -7,28 +7,46 @@ using WikiObjects.Data.Model;
 
 namespace WikiObjects.Data.ModelInterface
 {
-    public class TeamInterface : ACLInterface<Team>
+    public class Team : ACLContainer, IACLMember, IApplyModel<TeamModel, Team>
+    {
+        public static Team FromModel(TeamModel um)
+        {
+            return new Team() { Id = um.ID, Name = um.name, Acl = um.acl };
+        }
+
+        public void ApplyModel(TeamModel um)
+        {
+            Id = um.ID;
+            Name = um.name;
+            Acl = um.acl;
+        }
+
+        public string Name { get; set; }
+        public string Id { get; set; }
+    }
+
+    public class TeamInterface : ACLInterface<TeamModel, Team>
     {
         public static Team Create(string name, User owner)
         {
-            Team team = new Team(owner) { name = name };
+            TeamModel team = new TeamModel(owner.Id) { name = name };
             team.Save();
-            return team;
+            return Team.FromModel(team);
         }
 
         public static Team GetByName(string name)
         {
-            var teams = DB.Find<Team>()
+            var teams = DB.Find<TeamModel>()
                 .Match(t => t.name.Equals(name))
                 .Limit(1)
                 .Execute();
 
-            return teams.Count > 0 ? teams.FirstOrDefault() : null;
+            return teams.Count > 0 ? Team.FromModel(teams.FirstOrDefault()) : null;
         }
 
         public static long Delete(string teamId)
         {
-            return DB.Delete<Team>(teamId).DeletedCount;
+            return DB.Delete<TeamModel>(teamId).DeletedCount;
         }
 
         public static bool Permissions(string teamId)
@@ -40,12 +58,12 @@ namespace WikiObjects.Data.ModelInterface
             return true;
         }
 
-        public static List<Team> GetAssociatedTeams(string memberId)
+        public static List<TeamModel> GetAssociatedTeams(string memberId)
         {
             string adminMember = string.Format("Acl.Admins.{0}", memberId);
             string readerMember = string.Format("Acl.Readers.{0}", memberId);
 
-            var teams = DB.Find<Team>()
+            var teams = DB.Find<TeamModel>()
                 .Match(t => t.Eq(x => x.acl.ownerId, memberId) |
                     t.Exists(adminMember) |
                     t.Exists(readerMember))

@@ -13,14 +13,14 @@ namespace WikiTests
                     "mongodb://root:asdfasdf@localhost:27025/"),
                     "test");
 
-            DB.Delete<User>(u => true);
-            DB.Delete<Team>(u => true);
-            DB.Delete<Page>(u => true);
-            DB.Delete<Attachment>(u => true);
+            DB.Delete<UserModel>(u => true);
+            DB.Delete<TeamModel>(u => true);
+            DB.Delete<PageModel>(u => true);
+            DB.Delete<AttachmentModel>(u => true);
 
-            User.CreateIndices();
-            Team.CreateIndices();
-            Page.CreateIndices();
+            UserModel.CreateIndices();
+            TeamModel.CreateIndices();
+            PageModel.CreateIndices();
         }
     }
 }

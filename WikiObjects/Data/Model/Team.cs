@@ -2,9 +2,10 @@
 
 namespace WikiObjects.Data.Model
 {
-    public class Team : ACLObject, ACLMember
+    [Name("Team")]
+    public class TeamModel : ACLObject
     {
-        public Team(User owner) : base(owner)
+        public TeamModel(string ownerId) : base(ownerId)
         {
         }
 
@@ -12,7 +13,7 @@ namespace WikiObjects.Data.Model
 
         public static void CreateIndices()
         {
-            DB.Index<Team>()
+            DB.Index<TeamModel>()
                 .Key(t => t.name, KeyType.Descending)
                 .Option(t => t.Unique = true)
                 .Create();

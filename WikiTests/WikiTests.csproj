@@ -17,4 +17,8 @@
     <ProjectReference Include="..\WikiObjects\WikiObjects.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Library\" />
+  </ItemGroup>
+
 </Project>

@@ -12,12 +12,12 @@ namespace WikiTests
         public List<User> users { get; set; } = new List<User>();
         public PageTestContext() : base()
         {
-            users.Add(UserInterface.Create("Sarah1", "Swank1", "sarah1.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah2", "Swank2", "sarah2.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah3", "Swank3", "sarah3.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah4", "Swank4", "sarah4.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah5", "Swank5", "sarah5.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah6", "Swank6", "sarah6.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah1 Swank1", "sarah1.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah2 Swank2", "sarah2.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah3 Swank3", "sarah3.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah4 Swank4", "sarah4.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah5 Swank5", "sarah5.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah6 Swank6", "sarah6.swank@gmail.com"));
 
             //    PageInterface.AddMember(page, user2, MemberLists.Admins);
             //    PageInterface.AddMember(page, user3, MemberLists.Admins);
@@ -40,7 +40,7 @@ namespace WikiTests
         public PageTests(PageTestContext ptc)
         {
             pageTestContext = ptc;
-            DB.Delete<Page>(t => true);
+            DB.Delete<PageModel>(t => true);
         }
 
         [Fact]
@@ -53,10 +53,26 @@ namespace WikiTests
 
             Assert.NotNull(fetched);
 
-            Assert.Equal(page.ID, fetched.ID);
+            Assert.Equal(page.Id, fetched.Id);
 
-            Assert.Equal(pageName, fetched.name);
-            Assert.Equal(fetched.acl.ownerId, pageTestContext.users[0].ID);
+            Assert.Equal(pageName, fetched.Name);
+            Assert.Equal(fetched.Acl.ownerId, pageTestContext.users[0].Id);
+        }
+
+        [Fact]
+        public void CreatePageTest2()
+        {
+            string pageName = "New Page";
+            var page = PageInterface.Create(pageName, pageTestContext.users[0]);
+
+            var fetched = PageInterface.GetById(page.Id);
+
+            Assert.NotNull(fetched);
+
+            Assert.Equal(page.Id, fetched.Id);
+
+            Assert.Equal(pageName, fetched.Name);
+            Assert.Equal(fetched.Acl.ownerId, pageTestContext.users[0].Id);
         }
 
         [Fact]
@@ -69,7 +85,7 @@ namespace WikiTests
 
             Assert.NotNull(fetched);
 
-            long count = PageInterface.Delete(page.ID);
+            long count = PageInterface.Delete(page.Id);
             Assert.Equal(1, count);
 
             fetched = PageInterface.GetByName(pageName);
@@ -90,7 +106,7 @@ namespace WikiTests
             Assert.NotNull(fetchedPage);
             Assert.NotNull(fetchedPage2);
 
-            long count = PageInterface.Delete(page.ID);
+            long count = PageInterface.Delete(page.Id);
             Assert.Equal(1, count);
 
             fetchedPage = PageInterface.GetByName(pageName);
@@ -116,7 +132,7 @@ namespace WikiTests
             fetched = PageInterface.GetByName(secondPageName);
 
             Assert.NotNull(fetched);
-            Assert.Equal(fetched.parentId, page.ID);
+            Assert.Equal(fetched.ParentId, page.Id);
         }
     }
 }

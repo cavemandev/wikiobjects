@@ -1,8 +1,11 @@
-﻿namespace WikiObjects.Data.Model
+﻿using MongoDB.Entities;
+
+namespace WikiObjects.Data.Model
 {
-    public class Page : ACLObject
+    [Name("Page")]
+    public class PageModel : ACLObject
     {
-        public Page(User owner) : base(owner) { }
+        public PageModel(string ownerId) : base(ownerId) { }
 
         public string name { get; set; }
 

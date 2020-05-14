@@ -14,12 +14,12 @@ namespace WikiTests
         public List<Page> pages { get; set; } = new List<Page>();
         public AttachmentTestContext() : base()
         {
-            users.Add(UserInterface.Create("Sarah1", "Swank1", "sarah1.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah2", "Swank2", "sarah2.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah3", "Swank3", "sarah3.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah4", "Swank4", "sarah4.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah5", "Swank5", "sarah5.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah6", "Swank6", "sarah6.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah1 Swank1", "sarah1.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah2 Swank2", "sarah2.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah3 Swank3", "sarah3.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah4 Swank4", "sarah4.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah5 Swank5", "sarah5.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah6 Swank6", "sarah6.swank@gmail.com"));
 
             pages.Add(PageInterface.Create("New Attachment", users[0]));
 
@@ -34,7 +34,7 @@ namespace WikiTests
         public AttachmentTests(AttachmentTestContext ptc)
         {
             attTestContext = ptc;
-            DB.Delete<Attachment>(t => true);
+            DB.Delete<AttachmentModel>(t => true);
         }
 
         [Fact]
@@ -47,11 +47,28 @@ namespace WikiTests
 
             Assert.NotNull(fetched);
 
-            Assert.Equal(att.ID, fetched.ID);
+            Assert.Equal(att.Id, fetched.Id);
 
-            Assert.Equal(attName, fetched.name);
-            Assert.Equal(fetched.acl.ownerId, attTestContext.users[0].ID);
-            Assert.Equal(fetched.parentId, attTestContext.pages[0].ID);
+            Assert.Equal(attName, fetched.Name);
+            Assert.Equal(fetched.Acl.ownerId, attTestContext.users[0].Id);
+            Assert.Equal(fetched.ParentId, attTestContext.pages[0].Id);
+        }
+
+        [Fact]
+        public void CreateAttachmentTest2()
+        {
+            string attName = "New Attachment";
+            var att = AttachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
+
+            var fetched = AttachmentInterface.GetById(att.Id);
+
+            Assert.NotNull(fetched);
+
+            Assert.Equal(att.Id, fetched.Id);
+
+            Assert.Equal(attName, fetched.Name);
+            Assert.Equal(fetched.Acl.ownerId, attTestContext.users[0].Id);
+            Assert.Equal(fetched.ParentId, attTestContext.pages[0].Id);
         }
 
         [Fact]
@@ -64,7 +81,7 @@ namespace WikiTests
 
             Assert.NotNull(fetched);
 
-            long count = AttachmentInterface.Delete(att.ID);
+            long count = AttachmentInterface.Delete(att.Id);
             Assert.Equal(1, count);
 
             fetched = AttachmentInterface.GetByName(attName);
@@ -85,7 +102,7 @@ namespace WikiTests
             Assert.NotNull(fetchedAttachment);
             Assert.NotNull(fetchedAttachment2);
 
-            long count = AttachmentInterface.Delete(att.ID);
+            long count = AttachmentInterface.Delete(att.Id);
             Assert.Equal(1, count);
 
             fetchedAttachment = AttachmentInterface.GetByName(attName);

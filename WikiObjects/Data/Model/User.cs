@@ -1,18 +1,16 @@
 ﻿using MongoDB.Entities;
-using MongoDB.Entities.Core;
 
 namespace WikiObjects.Data.Model
 {
-    public class User : MongoModel, ACLMember
+    [Name("User")]
+    public class UserModel : MongoModel
     {
-        public string givenName { get; set; }
-        public string lastName { get; set; }
-
+        public string name { get; set; }
         public string email { get; set; }
 
         public static void CreateIndices()
         {
-            DB.Index<User>()
+            DB.Index<UserModel>()
                 .Key(x => x.email, KeyType.Descending)
                 .Option(o => o.Unique = true)
                 .Create();

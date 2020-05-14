@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WikiObjects.Controllers
+namespace WikiObjects.Library
 {
-    class UserController
+    class NotAuthorized : Exception
     {
     }
 }

@@ -10,12 +10,12 @@ namespace WikiObjects.Data.Model
     {
         public ACL acl { get; set; }
 
-        public ACLObject(User owner)
+        public ACLObject(string ownerId)
         {
-            acl = new ACL(owner.ID);
+            acl = new ACL(ownerId);
         }
 
-        public void ChangeOwner(User newOwner)
+        public void ChangeOwner(UserModel newOwner)
         {
             acl.ownerId = newOwner.ID;
         }

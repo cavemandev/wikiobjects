@@ -21,7 +21,7 @@ namespace WikiObjects.Data.ModelInterface
         owner = 3,
     }
 
-    public class ACLInterface<T> where T : ACLObject
+    public class ACLInterface<T, S> : BaseInterface<T, S> where T : ACLObject where S: IApplyModel<T, S>, new()
     {
         private static string ACLMemberString(string id, MemberList type)
         {
@@ -47,43 +47,45 @@ namespace WikiObjects.Data.ModelInterface
 
         public static void ChangeOwner(string objectId, User newOwner)
         {
-            DB.Update<Team>()
+            DB.Update<TeamModel>()
                 .Match(a => a.ID == objectId)
-                .Modify(a => a.Set("acl.ownerId", newOwner.ID))
+                .Modify(a => a.Set("acl.ownerId", newOwner.Id))
                 .Execute();
         }
 
-        public static void AddMember(T aclObject, User member, MemberList type)
+        public static bool AddMember(T aclObject, User member, MemberList type)
         {
-            AddMember(aclObject.ID, member, type);
+            return AddMember(aclObject.ID, member, type);
         }
 
-        public static void AddMember(string aclObjectId, ACLMember member, MemberList type)
+        public static bool AddMember(string aclObjectId, IACLMember member, MemberList type)
         {
             MemberList otherType = type == MemberList.admins ? MemberList.readers : MemberList.admins;
 
             MemberType memberType = (member as User) != null ? MemberType.user : MemberType.team;
 
             // TODO: Check to see if member is an owner, if so, don't do anything
-            DB.Update<Team>()
+            DB.Update<TeamModel>()
                 .Match(a => a.ID == aclObjectId)
-                .Match(a => a.acl.ownerId != member.ID)
-                .Modify(a => a.Set(ACLMemberString(member.ID, type), memberType))
-                .Modify(a => a.Unset(ACLMemberString(member.ID, otherType)))
+                .Match(a => a.acl.ownerId != member.Id)
+                .Modify(a => a.Set(ACLMemberString(member.Id, type), memberType))
+                .Modify(a => a.Unset(ACLMemberString(member.Id, otherType)))
                 .Execute();
+
+            return true;
         }
 
-        public static void RemoveMember(T aclObject, ACLMember member)
+        public static void RemoveMember(T aclObject, IACLMember member)
         {
             RemoveMember(aclObject.ID, member);
         }
 
-        public static void RemoveMember(string aclObjectId, ACLMember member)
+        public static void RemoveMember(string aclObjectId, IACLMember member)
         {
             DB.Update<T>()
                 .Match(a => a.ID == aclObjectId)
-                .Modify(a => a.Unset(string.Format("acl.{0}.{1}", MemberList.readers.ToString("g"), member.ID)))
-                .Modify(a => a.Unset(string.Format("acl.{0}.{1}", MemberList.admins.ToString("g"), member.ID)))
+                .Modify(a => a.Unset(string.Format("acl.{0}.{1}", MemberList.readers.ToString("g"), member.Id)))
+                .Modify(a => a.Unset(string.Format("acl.{0}.{1}", MemberList.admins.ToString("g"), member.Id)))
                 .Execute();
         }
 
@@ -96,24 +98,24 @@ namespace WikiObjects.Data.ModelInterface
         {
             var teams = DB.Find<T>()
                 .Match(aclObjectId)
-                .Match(t => t.acl.ownerId == member.ID)
+                .Match(t => t.acl.ownerId == member.Id)
                 .Execute();
 
             return teams != null;
         }
 
-        public static bool IsAdmin(T aclObject, ACLMember member)
+        public static bool IsAdmin(T aclObject, IACLMember member)
         {
             return IsAdmin(aclObject.ID, member);
         }
 
-        public static bool IsAdmin(string aclObjectId, ACLMember member)
+        public static bool IsAdmin(string aclObjectId, IACLMember member)
         {
             var team = DB.Find<T>()
                 .One(aclObjectId);
 
             // Check to see if the member is the owner, or just in the admins list
-            if (team.acl.ownerId == member.ID || team.acl.admins.ContainsKey(member.ID))
+            if (team.acl.ownerId == member.Id || team.acl.admins.ContainsKey(member.Id))
             {
                 return true;
             }
@@ -126,21 +128,21 @@ namespace WikiObjects.Data.ModelInterface
                 admins = CombineMemberLists(admins, GetTeamMembership(teamId));
             });
 
-            return admins.ContainsKey(member.ID);
+            return admins.ContainsKey(member.Id);
         }
 
-        public static bool IsReader(T aclObject, ACLMember member)
+        public static bool IsReader(T aclObject, IACLMember member)
         {
             return IsReader(aclObject.ID, member);
         }
 
-        public static bool IsReader(string aclObjectId, ACLMember member)
+        public static bool IsReader(string aclObjectId, IACLMember member)
         {
             var team = DB.Find<T>()
                 .One(aclObjectId);
 
             // Check to see if the member is the owner, or just in the admins or readers lists
-            if (team.acl.ownerId == member.ID || team.acl.admins.ContainsKey(member.ID) || team.acl.readers.ContainsKey(member.ID))
+            if (team.acl.ownerId == member.Id || team.acl.admins.ContainsKey(member.Id) || team.acl.readers.ContainsKey(member.Id))
             {
                 return true;
             }
@@ -154,14 +156,14 @@ namespace WikiObjects.Data.ModelInterface
                 readers = CombineMemberLists(readers, GetTeamMembership(teamId));
             });
 
-            return readers.ContainsKey(member.ID);
+            return readers.ContainsKey(member.Id);
         }
 
-        public static MemberListDict GetTeamMembership(string teamId)
+        private static MemberListDict GetTeamMembership(string teamId)
         {
             var memberShip = new MemberListDict();
             
-            var team = DB.Find<Team>()
+            var team = DB.Find<TeamModel>()
                 .One(teamId);
             
             if (team != null)

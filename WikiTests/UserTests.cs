@@ -21,24 +21,39 @@ namespace WikiTests
         public UserTests(UserTestContext utc)
         {
             userTestContext = utc;
+            DB.Delete<UserModel>(u => true);
         }
 
         [Fact]
         public void CreateUserTest()
         {
             string email = "adam.swank@gmail.com";
-            string givenName = "Adam";
-            string lastName = "Swank";
-            var user = UserInterface.Create(givenName, lastName, email);
+            string name= "Adam Swank";
+            var user = UserInterface.Create(name, email);
 
             var fetchedUser = UserInterface.GetByEmail(email);
 
             Assert.NotNull(fetchedUser);
 
-            Assert.Equal(user.ID, fetchedUser.ID);
-            Assert.Equal(givenName, fetchedUser.givenName);
-            Assert.Equal(lastName, fetchedUser.lastName);
-            Assert.Equal(email, fetchedUser.email);
+            Assert.Equal(user.Id, fetchedUser.Id);
+            Assert.Equal(name, fetchedUser.Name);
+            Assert.Equal(email, fetchedUser.Email);
+        }
+
+        [Fact]
+        public void CreateUserTest2()
+        {
+            string email = "adam.swank@gmail.com";
+            string name = "Adam Swank";
+            var user = UserInterface.Create(name, email);
+
+            var fetchedUser = UserInterface.GetById(user.Id);
+
+            Assert.NotNull(fetchedUser);
+
+            Assert.Equal(user.Id, fetchedUser.Id);
+            Assert.Equal(name, fetchedUser.Name);
+            Assert.Equal(email, fetchedUser.Email);
         }
 
         [Fact]

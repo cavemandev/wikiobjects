@@ -14,12 +14,12 @@ namespace WikiTests
         public List<User> users { get; set; } = new List<User>();
         public TeamTestContext() : base()
         {
-            users.Add(UserInterface.Create("Sarah1", "Swank1", "sarah1.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah2", "Swank2", "sarah2.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah3", "Swank3", "sarah3.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah4", "Swank4", "sarah4.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah5", "Swank5", "sarah5.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah6", "Swank6", "sarah6.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah1 Swank1", "sarah1.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah2 Swank2", "sarah2.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah3 Swank3", "sarah3.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah4 Swank4", "sarah4.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah5 Swank5", "sarah5.swank@gmail.com"));
+            users.Add(UserInterface.Create("Sarah6 Swank6", "sarah6.swank@gmail.com"));
             
             //    TeamInterface.AddMember(team, user2, MemberLists.Admins);
             //    TeamInterface.AddMember(team, user3, MemberLists.Admins);
@@ -27,10 +27,10 @@ namespace WikiTests
             //    TeamInterface.RemoveMember(team, user2, MemberLists.Admins);
             //    TeamInterface.AddMember(team, user5, MemberLists.Admins);
 
-            //    bool isAdmin = TeamInterface.IsAdmin(team.ID, user2);
-            //    isAdmin = TeamInterface.IsAdmin(team.ID, user3);
-            //    isAdmin = TeamInterface.IsAdmin(team.ID, user);
-            //    isAdmin = TeamInterface.IsAdmin(team.ID, user4);
+            //    bool isAdmin = TeamInterface.IsAdmin(team.Id, user2);
+            //    isAdmin = TeamInterface.IsAdmin(team.Id, user3);
+            //    isAdmin = TeamInterface.IsAdmin(team.Id, user);
+            //    isAdmin = TeamInterface.IsAdmin(team.Id, user4);
         }
     }
 
@@ -42,7 +42,7 @@ namespace WikiTests
         public TeamTests(TeamTestContext ttc)
         {
             teamTestContext = ttc;
-            DB.Delete<Team>(t => true);
+            DB.Delete<TeamModel>(t => true);
         }
         
         [Fact]
@@ -55,10 +55,26 @@ namespace WikiTests
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+        }
+
+        [Fact]
+        public void CreateTeamTest2()
+        {
+            string teamName = "New Team";
+            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+
+            var fetchedTeam = TeamInterface.GetById(team.Id);
+
+            Assert.NotNull(fetchedTeam);
+
+            Assert.Equal(team.Id, fetchedTeam.Id);
+
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
         }
 
         [Fact]
@@ -71,7 +87,7 @@ namespace WikiTests
 
             Assert.NotNull(fetchedTeam);
 
-            long count = TeamInterface.Delete(team.ID);
+            long count = TeamInterface.Delete(team.Id);
             Assert.Equal(1, count);
 
             fetchedTeam = TeamInterface.GetByName(teamName);
@@ -92,7 +108,7 @@ namespace WikiTests
             Assert.NotNull(fetchedTeam);
             Assert.NotNull(fetchedTeam2);
 
-            long count = TeamInterface.Delete(team.ID);
+            long count = TeamInterface.Delete(team.Id);
             Assert.Equal(1, count);
 
             fetchedTeam = TeamInterface.GetByName(teamName);
@@ -118,17 +134,17 @@ namespace WikiTests
             var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.ID, teamTestContext.users[1], MemberList.readers);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.readers);
 
             var fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
-            Assert.True(fetchedTeam.acl.readers.ContainsKey(teamTestContext.users[1].ID));
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+            Assert.True(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[1].Id));
         }
 
         [Fact]
@@ -138,17 +154,17 @@ namespace WikiTests
             var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.ID, teamTestContext.users[1], MemberList.admins);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
 
             var fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[1].ID));
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[1].Id));
         }
 
         [Fact]
@@ -158,17 +174,17 @@ namespace WikiTests
             var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.ID, teamTestContext.users[0], MemberList.admins);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[0], MemberList.admins);
 
             var fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
-            Assert.False(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[0].ID));
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+            Assert.False(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[0].Id));
         }
 
         [Fact]
@@ -178,42 +194,42 @@ namespace WikiTests
             var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.ID, teamTestContext.users[1], MemberList.admins);
-            TeamInterface.AddMember(team.ID, teamTestContext.users[2], MemberList.readers);
-            TeamInterface.AddMember(team.ID, teamTestContext.users[3], MemberList.admins);
-            TeamInterface.AddMember(team.ID, teamTestContext.users[4], MemberList.admins);
-            TeamInterface.AddMember(team.ID, teamTestContext.users[5], MemberList.readers);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[2], MemberList.readers);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[3], MemberList.admins);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[4], MemberList.admins);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[5], MemberList.readers);
 
             var fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[1].ID));
-            Assert.True(fetchedTeam.acl.readers.ContainsKey(teamTestContext.users[2].ID));
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[3].ID));
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[4].ID));
-            Assert.True(fetchedTeam.acl.readers.ContainsKey(teamTestContext.users[5].ID));
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[1].Id));
+            Assert.True(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[2].Id));
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[3].Id));
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[4].Id));
+            Assert.True(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[5].Id));
 
-            TeamInterface.RemoveMember(team.ID, teamTestContext.users[1]);
-            TeamInterface.RemoveMember(team.ID, teamTestContext.users[5]);
+            TeamInterface.RemoveMember(team.Id, teamTestContext.users[1]);
+            TeamInterface.RemoveMember(team.Id, teamTestContext.users[5]);
 
             fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
-            Assert.False(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[1].ID));
-            Assert.True(fetchedTeam.acl.readers.ContainsKey(teamTestContext.users[2].ID));
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[3].ID));
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[4].ID));
-            Assert.False(fetchedTeam.acl.readers.ContainsKey(teamTestContext.users[5].ID));
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+            Assert.False(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[1].Id));
+            Assert.True(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[2].Id));
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[3].Id));
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[4].Id));
+            Assert.False(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[5].Id));
         }
         
         [Fact]
@@ -223,31 +239,31 @@ namespace WikiTests
             var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.ID, teamTestContext.users[1], MemberList.admins);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
             
             var fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[1].ID));
-            Assert.False(fetchedTeam.acl.readers.ContainsKey(teamTestContext.users[1].ID));
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[1].Id));
+            Assert.False(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[1].Id));
 
-            TeamInterface.AddMember(team.ID, teamTestContext.users[1], MemberList.readers);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.readers);
             
             fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
-            Assert.False(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[1].ID));
-            Assert.True(fetchedTeam.acl.readers.ContainsKey(teamTestContext.users[1].ID));
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+            Assert.False(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[1].Id));
+            Assert.True(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[1].Id));
         }
 
         [Fact]
@@ -262,21 +278,21 @@ namespace WikiTests
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
             
-            TeamInterface.ChangeOwner(team.ID, teamTestContext.users[1]);
+            TeamInterface.ChangeOwner(team.Id, teamTestContext.users[1]);
 
             fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[1].ID);
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[1].Id);
         }
 
         [Fact]
@@ -288,21 +304,21 @@ namespace WikiTests
 
             var team2 = TeamInterface.Create("Second Team", teamTestContext.users[0]);
 
-            TeamInterface.AddMember(team.ID, teamTestContext.users[1], MemberList.admins);
-            TeamInterface.AddMember(team.ID, team2, MemberList.admins);
+            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
+            TeamInterface.AddMember(team.Id, team2, MemberList.admins);
 
             var fetchedTeam = TeamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            Assert.Equal(team.ID, fetchedTeam.ID);
+            Assert.Equal(team.Id, fetchedTeam.Id);
 
-            Assert.Equal(teamName, fetchedTeam.name);
-            Assert.Equal(fetchedTeam.acl.ownerId, teamTestContext.users[0].ID);
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(teamTestContext.users[1].ID));
-            Assert.Equal(MemberType.user, fetchedTeam.acl.admins[teamTestContext.users[1].ID]);
-            Assert.True(fetchedTeam.acl.admins.ContainsKey(team2.ID));
-            Assert.Equal(MemberType.team, fetchedTeam.acl.admins[team2.ID]);
+            Assert.Equal(teamName, fetchedTeam.Name);
+            Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[1].Id));
+            Assert.Equal(MemberType.user, fetchedTeam.Acl.admins[teamTestContext.users[1].Id]);
+            Assert.True(fetchedTeam.Acl.admins.ContainsKey(team2.Id));
+            Assert.Equal(MemberType.team, fetchedTeam.Acl.admins[team2.Id]);
         }
     }
 }
