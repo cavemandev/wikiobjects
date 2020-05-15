@@ -14,14 +14,17 @@ namespace WikiTests
         public List<Page> pages { get; set; } = new List<Page>();
         public AttachmentTestContext() : base()
         {
-            users.Add(UserInterface.Create("Sarah1 Swank1", "sarah1.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah2 Swank2", "sarah2.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah3 Swank3", "sarah3.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah4 Swank4", "sarah4.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah5 Swank5", "sarah5.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah6 Swank6", "sarah6.swank@gmail.com"));
+            UserInterface userInterface = new UserInterface();
+            users.Add(userInterface.Create("Sarah1 Swank1", "sarah1.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah2 Swank2", "sarah2.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah3 Swank3", "sarah3.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah4 Swank4", "sarah4.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah5 Swank5", "sarah5.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah6 Swank6", "sarah6.swank@gmail.com"));
 
-            pages.Add(PageInterface.Create("New Attachment", users[0]));
+            PageInterface pageInterface = new PageInterface();
+
+            pages.Add(pageInterface.Create("New Attachment", users[0]));
 
         }
     }
@@ -29,7 +32,8 @@ namespace WikiTests
     [Collection("Model")]
     public class AttachmentTests : IClassFixture<AttachmentTestContext>
     {
-        AttachmentTestContext attTestContext;
+        private AttachmentTestContext attTestContext;
+        private AttachmentInterface attachmentInterface = new AttachmentInterface();
 
         public AttachmentTests(AttachmentTestContext ptc)
         {
@@ -41,9 +45,9 @@ namespace WikiTests
         public void CreateAttachmentTest()
         {
             string attName = "New Attachment";
-            var att = AttachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
+            var att = attachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
 
-            var fetched = AttachmentInterface.GetByName(attName);
+            var fetched = attachmentInterface.GetByName(attName);
 
             Assert.NotNull(fetched);
 
@@ -58,9 +62,9 @@ namespace WikiTests
         public void CreateAttachmentTest2()
         {
             string attName = "New Attachment";
-            var att = AttachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
+            var att = attachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
 
-            var fetched = AttachmentInterface.GetById(att.Id);
+            var fetched = attachmentInterface.GetById(att.Id);
 
             Assert.NotNull(fetched);
 
@@ -75,16 +79,16 @@ namespace WikiTests
         public void DeleteAttachmentTest()
         {
             string attName = "New Attachment";
-            var att = AttachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
+            var att = attachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
 
-            var fetched = AttachmentInterface.GetByName(attName);
+            var fetched = attachmentInterface.GetByName(attName);
 
             Assert.NotNull(fetched);
 
-            long count = AttachmentInterface.Delete(att.Id);
+            long count = attachmentInterface.Delete(att.Id);
             Assert.Equal(1, count);
 
-            fetched = AttachmentInterface.GetByName(attName);
+            fetched = attachmentInterface.GetByName(attName);
             Assert.Null(fetched);
         }
 
@@ -93,21 +97,21 @@ namespace WikiTests
         {
             string attName = "New Attachment";
             string attName2 = "New Attachment 2";
-            var att = AttachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
-            var att2 = AttachmentInterface.Create(attName2, attTestContext.pages[0], attTestContext.users[0]);
+            var att = attachmentInterface.Create(attName, attTestContext.pages[0], attTestContext.users[0]);
+            var att2 = attachmentInterface.Create(attName2, attTestContext.pages[0], attTestContext.users[0]);
 
-            var fetchedAttachment = AttachmentInterface.GetByName(attName);
-            var fetchedAttachment2 = AttachmentInterface.GetByName(attName2);
+            var fetchedAttachment = attachmentInterface.GetByName(attName);
+            var fetchedAttachment2 = attachmentInterface.GetByName(attName2);
 
             Assert.NotNull(fetchedAttachment);
             Assert.NotNull(fetchedAttachment2);
 
-            long count = AttachmentInterface.Delete(att.Id);
+            long count = attachmentInterface.Delete(att.Id);
             Assert.Equal(1, count);
 
-            fetchedAttachment = AttachmentInterface.GetByName(attName);
+            fetchedAttachment = attachmentInterface.GetByName(attName);
             Assert.Null(fetchedAttachment);
-            fetchedAttachment2 = AttachmentInterface.GetByName(attName2);
+            fetchedAttachment2 = attachmentInterface.GetByName(attName2);
             Assert.NotNull(fetchedAttachment2);
         }
     }

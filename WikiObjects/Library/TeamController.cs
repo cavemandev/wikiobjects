@@ -1,43 +1,59 @@
-﻿using WikiObjects.Data.ModelInterface;
+﻿using MongoDB.Driver;
+using System.Collections.Generic;
+using WikiObjects.Data.ModelInterface;
 using WikiObjects.Library;
+using WikiObjects.Library.Exceptions;
 
 namespace WikiObjects.Controllers
 {
-    class TeamController
+    public class TeamController : BaseMembership
     {
+        private TeamInterface teamInterface = new TeamInterface();
+
+        public TeamController() : base(new TeamInterface())
+        {
+            teamInterface = membershipInterface as TeamInterface;
+        }
+
         public Team Create(string name, User owner)
         {
-            return TeamInterface.Create(name, owner);
+            try
+            {
+                return teamInterface.Create(name, owner);
+            }
+            catch (MongoWriteException)
+            {
+                throw new InvalidArugment();
+            }
         }
 
-        public bool AddAdmin(string teamId, string newAdminId, User subject)
+        public long Delete(string teamId, User subject)
         {
-            if (!TeamInterface.IsAdmin(teamId, subject))
+            if (!membershipInterface.IsAdmin(teamId, subject))
             {
                 throw new NotAuthorized();
             }
 
-            return TeamInterface.AddMember(teamId, UserInterface.GetById(newAdminId), MemberList.admins);
+            return teamInterface.Delete(teamId);
         }
 
-        public bool AddReader(string teamId, string newAdminId, User subject)
+        public Team Get(string teamId, User subject)
         {
-            if (!TeamInterface.IsAdmin(teamId, subject))
+            if (!teamInterface.IsReader(teamId, subject))
             {
                 throw new NotAuthorized();
             }
 
-            return TeamInterface.AddMember(teamId, UserInterface.GetById(newAdminId), MemberList.readers);
+            return teamInterface.GetById(teamId);
         }
 
-        public bool RemoveMember(string teamId, string unMemberId, User subject)
+        public Team Update(string teamId, Dictionary<string, string> updates, User subject)
         {
-            if (!TeamInterface.IsAdmin(teamId, subject))
+            if (!teamInterface.IsAdmin(teamId, subject))
             {
                 throw new NotAuthorized();
             }
-
-            return TeamInterface.RemoveMember(teamId, unMemberId)
+            return teamInterface.Update(teamId, updates);
         }
     }
 }

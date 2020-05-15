@@ -3,7 +3,7 @@
 namespace WikiObjects.Data.Model
 {
     [Name("Page")]
-    public class PageModel : ACLObject
+    public class PageModel : AclObject
     {
         public PageModel(string ownerId) : base(ownerId) { }
 

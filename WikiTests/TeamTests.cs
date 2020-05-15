@@ -11,47 +11,30 @@ namespace WikiTests
 {
     public class TeamTestContext : BaseTestContext 
     {
-        public List<User> users { get; set; } = new List<User>();
-        public TeamTestContext() : base()
-        {
-            users.Add(UserInterface.Create("Sarah1 Swank1", "sarah1.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah2 Swank2", "sarah2.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah3 Swank3", "sarah3.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah4 Swank4", "sarah4.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah5 Swank5", "sarah5.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah6 Swank6", "sarah6.swank@gmail.com"));
-            
-            //    TeamInterface.AddMember(team, user2, MemberLists.Admins);
-            //    TeamInterface.AddMember(team, user3, MemberLists.Admins);
-            //    TeamInterface.AddMember(team, user4, MemberLists.Readers);
-            //    TeamInterface.RemoveMember(team, user2, MemberLists.Admins);
-            //    TeamInterface.AddMember(team, user5, MemberLists.Admins);
-
-            //    bool isAdmin = TeamInterface.IsAdmin(team.Id, user2);
-            //    isAdmin = TeamInterface.IsAdmin(team.Id, user3);
-            //    isAdmin = TeamInterface.IsAdmin(team.Id, user);
-            //    isAdmin = TeamInterface.IsAdmin(team.Id, user4);
-        }
     }
 
     [Collection("Model")]
     public class TeamTests : IClassFixture<TeamTestContext>
     {
-        TeamTestContext teamTestContext;
+        private TeamTestContext teamTestContext;
+        private TeamInterface teamInterface = new TeamInterface();
 
         public TeamTests(TeamTestContext ttc)
         {
             teamTestContext = ttc;
-            DB.Delete<TeamModel>(t => true);
+            teamTestContext.ClearTeams();
+            teamTestContext.ClearUsers();
+
+            ttc.CreateUsers();
         }
         
         [Fact]
         public void CreateTeamTest()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
 
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -65,9 +48,9 @@ namespace WikiTests
         public void CreateTeamTest2()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
 
-            var fetchedTeam = TeamInterface.GetById(team.Id);
+            var fetchedTeam = teamInterface.GetById(team.Id);
 
             Assert.NotNull(fetchedTeam);
 
@@ -81,16 +64,16 @@ namespace WikiTests
         public void DeleteTeamTest()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
 
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
-            long count = TeamInterface.Delete(team.Id);
+            long count = teamInterface.Delete(team.Id);
             Assert.Equal(1, count);
 
-            fetchedTeam = TeamInterface.GetByName(teamName);
+            fetchedTeam = teamInterface.GetByName(teamName);
             Assert.Null(fetchedTeam);
         }
 
@@ -99,21 +82,21 @@ namespace WikiTests
         {
             string teamName = "New Team";
             string teamName2 = "New Team 2";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
-            var team2 = TeamInterface.Create(teamName2, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
+            var team2 = teamInterface.Create(teamName2, teamTestContext.users[0]);
 
-            var fetchedTeam = TeamInterface.GetByName(teamName);
-            var fetchedTeam2 = TeamInterface.GetByName(teamName2);
+            var fetchedTeam = teamInterface.GetByName(teamName);
+            var fetchedTeam2 = teamInterface.GetByName(teamName2);
 
             Assert.NotNull(fetchedTeam);
             Assert.NotNull(fetchedTeam2);
 
-            long count = TeamInterface.Delete(team.Id);
+            long count = teamInterface.Delete(team.Id);
             Assert.Equal(1, count);
 
-            fetchedTeam = TeamInterface.GetByName(teamName);
+            fetchedTeam = teamInterface.GetByName(teamName);
             Assert.Null(fetchedTeam);
-            fetchedTeam2 = TeamInterface.GetByName(teamName2);
+            fetchedTeam2 = teamInterface.GetByName(teamName2);
             Assert.NotNull(fetchedTeam2);
         }
 
@@ -121,22 +104,22 @@ namespace WikiTests
         public void CreateDuplicateTeamTest()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            Assert.Throws<MongoWriteException>(() => TeamInterface.Create(teamName, teamTestContext.users[0]));
+            Assert.Throws<MongoWriteException>(() => teamInterface.Create(teamName, teamTestContext.users[0]));
         }
 
         [Fact]
         public void AddReader()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.readers);
+            teamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.readers);
 
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -151,12 +134,12 @@ namespace WikiTests
         public void AddAdmin()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
+            teamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
 
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -171,12 +154,12 @@ namespace WikiTests
         public void AddOwnerAsACLMember()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.Id, teamTestContext.users[0], MemberList.admins);
+            teamInterface.AddMember(team.Id, teamTestContext.users[0], MemberList.admins);
 
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -191,16 +174,17 @@ namespace WikiTests
         public void AddRemoveMultiple()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
+            var team2 = teamInterface.Create("team 2", teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
-            TeamInterface.AddMember(team.Id, teamTestContext.users[2], MemberList.readers);
-            TeamInterface.AddMember(team.Id, teamTestContext.users[3], MemberList.admins);
-            TeamInterface.AddMember(team.Id, teamTestContext.users[4], MemberList.admins);
-            TeamInterface.AddMember(team.Id, teamTestContext.users[5], MemberList.readers);
+            teamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
+            teamInterface.AddMember(team.Id, teamTestContext.users[2], MemberList.readers);
+            teamInterface.AddMember(team.Id, teamTestContext.users[3], MemberList.admins);
+            teamInterface.AddMember(team.Id, teamTestContext.users[4], MemberList.admins);
+            teamInterface.AddMember(team.Id, teamTestContext.users[5], MemberList.readers);
 
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -214,10 +198,10 @@ namespace WikiTests
             Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[4].Id));
             Assert.True(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[5].Id));
 
-            TeamInterface.RemoveMember(team.Id, teamTestContext.users[1]);
-            TeamInterface.RemoveMember(team.Id, teamTestContext.users[5]);
+            teamInterface.RemoveMember(team.Id, teamTestContext.users[1]);
+            teamInterface.RemoveMember(team.Id, teamTestContext.users[5]);
 
-            fetchedTeam = TeamInterface.GetByName(teamName);
+            fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -230,18 +214,23 @@ namespace WikiTests
             Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[3].Id));
             Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[4].Id));
             Assert.False(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[5].Id));
+
+            fetchedTeam = teamInterface.GetById(team2.Id);
+
+            Assert.Empty(fetchedTeam.Acl.readers);
+            Assert.Empty(fetchedTeam.Acl.admins);
         }
         
         [Fact]
         public void SwitchFromAdminToReader()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
+            teamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
             
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -252,9 +241,9 @@ namespace WikiTests
             Assert.True(fetchedTeam.Acl.admins.ContainsKey(teamTestContext.users[1].Id));
             Assert.False(fetchedTeam.Acl.readers.ContainsKey(teamTestContext.users[1].Id));
 
-            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.readers);
+            teamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.readers);
             
-            fetchedTeam = TeamInterface.GetByName(teamName);
+            fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -270,11 +259,11 @@ namespace WikiTests
         public void ChangeOwner()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
             
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -283,9 +272,9 @@ namespace WikiTests
             Assert.Equal(teamName, fetchedTeam.Name);
             Assert.Equal(fetchedTeam.Acl.ownerId, teamTestContext.users[0].Id);
             
-            TeamInterface.ChangeOwner(team.Id, teamTestContext.users[1]);
+            teamInterface.ChangeOwner(team.Id, teamTestContext.users[1]);
 
-            fetchedTeam = TeamInterface.GetByName(teamName);
+            fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 
@@ -299,15 +288,15 @@ namespace WikiTests
         public void AddTeamAndUser()
         {
             string teamName = "New Team";
-            var team = TeamInterface.Create(teamName, teamTestContext.users[0]);
+            var team = teamInterface.Create(teamName, teamTestContext.users[0]);
             Assert.NotNull(team);
 
-            var team2 = TeamInterface.Create("Second Team", teamTestContext.users[0]);
+            var team2 = teamInterface.Create("Second Team", teamTestContext.users[0]);
 
-            TeamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
-            TeamInterface.AddMember(team.Id, team2, MemberList.admins);
+            teamInterface.AddMember(team.Id, teamTestContext.users[1], MemberList.admins);
+            teamInterface.AddMember(team.Id, team2, MemberList.admins);
 
-            var fetchedTeam = TeamInterface.GetByName(teamName);
+            var fetchedTeam = teamInterface.GetByName(teamName);
 
             Assert.NotNull(fetchedTeam);
 

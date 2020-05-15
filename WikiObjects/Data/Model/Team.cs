@@ -3,7 +3,7 @@
 namespace WikiObjects.Data.Model
 {
     [Name("Team")]
-    public class TeamModel : ACLObject
+    public class TeamModel : AclObject
     {
         public TeamModel(string ownerId) : base(ownerId)
         {

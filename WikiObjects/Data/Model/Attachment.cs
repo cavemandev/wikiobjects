@@ -3,7 +3,7 @@
 namespace WikiObjects.Data.Model
 {
     [Name("Attachment")]
-    public class AttachmentModel : ACLObject
+    public class AttachmentModel : AclObject
     {
         public AttachmentModel(string ownerId) : base (ownerId) { }
 

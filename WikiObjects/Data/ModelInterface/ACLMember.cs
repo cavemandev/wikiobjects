@@ -1,6 +1,6 @@
 ﻿namespace WikiObjects.Data.Model
 {
-    public interface IACLMember
+    public interface IAclMember
     {
         public string Id { get; set; }
     }
@@ -12,6 +12,6 @@
 
     public class ACLContainer
     {
-        public ACL Acl { get; set; }
+        public Acl Acl { get; set; }
     }
 }

@@ -6,13 +6,13 @@ using System.Text;
 
 namespace WikiObjects.Data.Model
 {
-    public class ACLObject : MongoModel
+    public class AclObject : MongoModel
     {
-        public ACL acl { get; set; }
+        public Acl acl { get; set; }
 
-        public ACLObject(string ownerId)
+        public AclObject(string ownerId)
         {
-            acl = new ACL(ownerId);
+            acl = new Acl(ownerId);
         }
 
         public void ChangeOwner(UserModel newOwner)

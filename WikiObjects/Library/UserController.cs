@@ -1,22 +1,27 @@
-﻿using WikiObjects.Data.ModelInterface;
+﻿using System.Collections.Generic;
+using WikiObjects.Data.ModelInterface;
 
 namespace WikiObjects.Controllers
 {
     public class UserController
     {
+        private UserInterface userInterface = new UserInterface();
+
+        
         public User Create(string name, string email)
         {
-            return UserInterface.Create(name, email);
+            return userInterface.Create(name, email);
         }
 
-        //public User Update(string name)
-        //{
-        //    return UserInterface.Update(name);
-        //}
+        
+        public User Update(User subject, Dictionary<string, string> updates)
+        {
+            return userInterface.Update(subject, updates);   
+        }
 
         public User Get(string userId)
         {
-            return UserInterface.GetById(userId);
+            return userInterface.GetById(userId);
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace WikiObjects.Library
+namespace WikiObjects.Library.Exceptions
 {
-    class NotAuthorized : Exception
+    public class NotAuthorized : Exception
+    {
+    }
+
+    public class InvalidArugment : Exception
     {
     }
 }

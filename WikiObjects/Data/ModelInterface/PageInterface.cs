@@ -31,9 +31,14 @@ namespace WikiObjects.Data.ModelInterface
         public string ParentId { get; set; }
     }
 
-    public class PageInterface : ACLInterface<PageModel, Page>
+    public class PageInterface : AclInterface<PageModel, Page>, IAclMembershipInterface
     {
-        public static Page Create(string name, User owner)
+        private enum UpdateFields
+        {
+            name,
+        }
+
+        public Page Create(string name, User owner)
         {
             var page = new PageModel(owner.Id) { name = name };
             page.Save();
@@ -41,7 +46,7 @@ namespace WikiObjects.Data.ModelInterface
             return Page.FromModel(page);
         }
 
-        public static Page Create(string name, Page parent, User owner)
+        public Page Create(string name, Page parent, User owner)
         {
             var page = new PageModel(owner.Id) { name = name, parentId = parent.Id };
             page.Save();
@@ -49,7 +54,7 @@ namespace WikiObjects.Data.ModelInterface
             return Page.FromModel(page);
         }
 
-        public static Page GetByName(string name)
+        public Page GetByName(string name)
         {
             var pages = DB.Find<PageModel>()
                 .Match(t => t.name.Equals(name))
@@ -59,18 +64,83 @@ namespace WikiObjects.Data.ModelInterface
             return pages.Count > 0 ? Page.FromModel(pages.FirstOrDefault()) : null;
         }
 
-        public static long Delete(string pageId)
+        public long Delete(string pageId)
         {
             var result = DB.Delete<PageModel>(pageId);
 
             return result.DeletedCount;
         }
 
-        public static List<Page> GetChildren(string pageId)
+        public List<Page> GetChildren(string pageId)
         {
             var pages = DB.Find<PageModel>().Match(p => p.parentId == pageId).Execute();
 
             return pages.Select(pm => Page.FromModel(pm)).ToList();
+        }
+
+        public Page Update(string teamId, Dictionary<string, string> updates)
+        {
+            PageModel pageModel = DB.Find<PageModel>().One(teamId);
+
+            if (pageModel == null)
+            {
+                return null;
+            }
+
+            if (updates.ContainsKey(UpdateFields.name.ToString()))
+            {
+                pageModel.name = updates[UpdateFields.name.ToString()];
+            }
+
+            pageModel.Save();
+
+            return Page.FromModel(pageModel);
+        }
+
+        override public bool IsAdmin(string pageId, User subject)
+        {
+            bool isAdmin = base.IsAdmin(pageId, subject);
+
+            if (!isAdmin)
+            {
+                var page = DB.Find<PageModel>()
+                .One(pageId);
+
+                if (page == null)
+                {
+                    return false;
+                }
+
+                if (page.parentId != null)
+                {
+                    return IsAdmin(page.parentId, subject);
+                }
+            }
+
+            return isAdmin;
+        }
+
+        override public bool IsReader(string pageId, User subject)
+        {
+            bool isReader = base.IsReader(pageId, subject);
+
+            if (!isReader)
+            {
+                var page = DB.Find<PageModel>()
+                .One(pageId);
+
+                if (page == null)
+                {
+                    return false;
+                }
+
+                if (page.parentId != null)
+                {
+                    return IsReader(page.parentId, subject);
+                }
+            }
+
+            return isReader;
         }
     }
 }

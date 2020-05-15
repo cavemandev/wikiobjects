@@ -7,8 +7,9 @@ using WikiObjects.Data.Model;
 
 namespace WikiObjects.Data.ModelInterface
 {
-    public class Team : ACLContainer, IACLMember, IApplyModel<TeamModel, Team>
+    public class Team : ACLContainer, IAclMember, IApplyModel<TeamModel, Team>
     {
+        public static string AdminTeamName = "admin";
         public static Team FromModel(TeamModel um)
         {
             return new Team() { Id = um.ID, Name = um.name, Acl = um.acl };
@@ -25,16 +26,21 @@ namespace WikiObjects.Data.ModelInterface
         public string Id { get; set; }
     }
 
-    public class TeamInterface : ACLInterface<TeamModel, Team>
+    public class TeamInterface : AclInterface<TeamModel, Team>, IAclMembershipInterface
     {
-        public static Team Create(string name, User owner)
+        private enum UpdateFields
+        {
+            name,
+        }
+
+        public Team Create(string name, User owner)
         {
             TeamModel team = new TeamModel(owner.Id) { name = name };
             team.Save();
             return Team.FromModel(team);
         }
 
-        public static Team GetByName(string name)
+        public Team GetByName(string name)
         {
             var teams = DB.Find<TeamModel>()
                 .Match(t => t.name.Equals(name))
@@ -44,12 +50,31 @@ namespace WikiObjects.Data.ModelInterface
             return teams.Count > 0 ? Team.FromModel(teams.FirstOrDefault()) : null;
         }
 
-        public static long Delete(string teamId)
+        public long Delete(string teamId)
         {
             return DB.Delete<TeamModel>(teamId).DeletedCount;
         }
 
-        public static bool Permissions(string teamId)
+        public Team Update(string teamId, Dictionary<string, string> updates)
+        {
+            TeamModel teamModel = DB.Find<TeamModel>().One(teamId);
+
+            if (teamModel == null)
+            {
+                return null;
+            }
+
+            if (updates.ContainsKey(UpdateFields.name.ToString()))
+            {
+                teamModel.name = updates[UpdateFields.name.ToString()];
+            }
+
+            teamModel.Save();
+
+            return Team.FromModel(teamModel);
+        }
+
+        public bool Permissions(string teamId)
         {
             // TODO: Search for teams with teamId
             // recursivily search upper teams until no more teams
@@ -58,7 +83,7 @@ namespace WikiObjects.Data.ModelInterface
             return true;
         }
 
-        public static List<TeamModel> GetAssociatedTeams(string memberId)
+        public List<TeamModel> GetAssociatedTeams(string memberId)
         {
             string adminMember = string.Format("Acl.Admins.{0}", memberId);
             string readerMember = string.Format("Acl.Readers.{0}", memberId);
@@ -71,6 +96,6 @@ namespace WikiObjects.Data.ModelInterface
                 .Execute();
 
             return teams;
-        } 
+        }
     }
 }

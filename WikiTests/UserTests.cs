@@ -17,6 +17,7 @@ namespace WikiTests
     public class UserTests: IClassFixture<UserTestContext>
     {
         private UserTestContext userTestContext;
+        private UserInterface userInterface = new UserInterface();
 
         public UserTests(UserTestContext utc)
         {
@@ -29,9 +30,9 @@ namespace WikiTests
         {
             string email = "adam.swank@gmail.com";
             string name= "Adam Swank";
-            var user = UserInterface.Create(name, email);
+            var user = userInterface.Create(name, email);
 
-            var fetchedUser = UserInterface.GetByEmail(email);
+            var fetchedUser = userInterface.GetByEmail(email);
 
             Assert.NotNull(fetchedUser);
 
@@ -45,9 +46,9 @@ namespace WikiTests
         {
             string email = "adam.swank@gmail.com";
             string name = "Adam Swank";
-            var user = UserInterface.Create(name, email);
+            var user = userInterface.Create(name, email);
 
-            var fetchedUser = UserInterface.GetById(user.Id);
+            var fetchedUser = userInterface.GetById(user.Id);
 
             Assert.NotNull(fetchedUser);
 
@@ -59,7 +60,7 @@ namespace WikiTests
         [Fact]
         public void GetNonExistentTest()
         {
-            var fetchedUser = UserInterface.GetByEmail("shouldntbethere@somewhere.com");
+            var fetchedUser = userInterface.GetByEmail("shouldntbethere@somewhere.com");
 
             Assert.Null(fetchedUser);
         }

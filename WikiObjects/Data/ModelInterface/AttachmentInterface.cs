@@ -6,7 +6,7 @@ using WikiObjects.Data.Model;
 
 namespace WikiObjects.Data.ModelInterface
 {
-    public class Attachment : ACLContainer, IACLMember, IApplyModel<AttachmentModel, Attachment>
+    public class Attachment : ACLContainer, IAclMember, IApplyModel<AttachmentModel, Attachment>
     {
         public static Attachment FromModel(AttachmentModel um)
         {
@@ -27,9 +27,14 @@ namespace WikiObjects.Data.ModelInterface
         public string ParentId { get; set; }
     }
 
-    public class AttachmentInterface : ACLInterface<AttachmentModel, Attachment>
+    public class AttachmentInterface : AclInterface<AttachmentModel, Attachment>, IAclMembershipInterface
     {
-        public static Attachment Create(string name, Page parent, User owner)
+        private enum UpdateFields
+        {
+            name,
+        }
+
+        public Attachment Create(string name, Page parent, User owner)
         {
             var att = new AttachmentModel(owner.Id) { name = name, parentId = parent.Id };
             att.Save();
@@ -37,7 +42,7 @@ namespace WikiObjects.Data.ModelInterface
             return Attachment.FromModel(att);
         }
 
-        public static Attachment GetByName(string name)
+        public Attachment GetByName(string name)
         {
             var atts = DB.Find<AttachmentModel>()
                 .Match(t => t.name.Equals(name))
@@ -47,18 +52,85 @@ namespace WikiObjects.Data.ModelInterface
             return atts.Count > 0 ? Attachment.FromModel(atts.FirstOrDefault()) : null;
         }
 
-        public static long Delete(string attachmentId)
+        public long Delete(string attachmentId)
         {
             var result = DB.Delete<AttachmentModel>(attachmentId);
 
             return result.DeletedCount;
         }
 
-        public static List<Attachment> GetByParentId(string parentId)
+        public List<Attachment> GetByParentId(string parentId)
         {
             var pages = DB.Find<AttachmentModel>().Match(p => p.parentId == parentId).Execute();
 
             return pages.Select(pm => Attachment.FromModel(pm)).ToList();
+        }
+
+        override public bool IsAdmin(string attachmentId, User subject)
+        {
+            bool isAdmin = base.IsAdmin(attachmentId, subject);
+
+            if (!isAdmin)
+            {
+                var att = DB.Find<AttachmentModel>()
+                .One(attachmentId);
+
+                if (att == null)
+                {
+                    return false;
+                }
+
+                if (att.parentId != null)
+                {
+                    PageInterface pageInterface = new PageInterface();
+                    return pageInterface.IsAdmin(att.parentId, subject);
+                }
+            }
+
+            return isAdmin;
+        }
+
+        override public bool IsReader(string attachmentId, User subject)
+        {
+            bool isReader = base.IsAdmin(attachmentId, subject);
+
+            if (!isReader)
+            {
+                var att = DB.Find<AttachmentModel>()
+                .One(attachmentId);
+
+                if (att == null)
+                {
+                    return false;
+                }
+
+                if (att.parentId != null)
+                {
+                    PageInterface pageInterface = new PageInterface();
+                    return pageInterface.IsReader(att.parentId, subject);
+                }
+            }
+
+            return isReader;
+        }
+
+        public Attachment Update(string teamId, Dictionary<string, string> updates)
+        {
+            AttachmentModel attModel = DB.Find<AttachmentModel>().One(teamId);
+
+            if (attModel == null)
+            {
+                return null;
+            }
+
+            if (updates.ContainsKey(UpdateFields.name.ToString()))
+            {
+                attModel.name = updates[UpdateFields.name.ToString()];
+            }
+
+            attModel.Save();
+
+            return Attachment.FromModel(attModel);
         }
     }
 }

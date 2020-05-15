@@ -12,30 +12,21 @@ namespace WikiTests
         public List<User> users { get; set; } = new List<User>();
         public PageTestContext() : base()
         {
-            users.Add(UserInterface.Create("Sarah1 Swank1", "sarah1.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah2 Swank2", "sarah2.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah3 Swank3", "sarah3.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah4 Swank4", "sarah4.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah5 Swank5", "sarah5.swank@gmail.com"));
-            users.Add(UserInterface.Create("Sarah6 Swank6", "sarah6.swank@gmail.com"));
-
-            //    PageInterface.AddMember(page, user2, MemberLists.Admins);
-            //    PageInterface.AddMember(page, user3, MemberLists.Admins);
-            //    PageInterface.AddMember(page, user4, MemberLists.Readers);
-            //    PageInterface.RemoveMember(page, user2, MemberLists.Admins);
-            //    PageInterface.AddMember(page, user5, MemberLists.Admins);
-
-            //    bool isAdmin = PageInterface.IsAdmin(page.ID, user2);
-            //    isAdmin = PageInterface.IsAdmin(page.ID, user3);
-            //    isAdmin = PageInterface.IsAdmin(page.ID, user);
-            //    isAdmin = PageInterface.IsAdmin(page.ID, user4);
+            UserInterface userInterface = new UserInterface();
+            users.Add(userInterface.Create("Sarah1 Swank1", "sarah1.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah2 Swank2", "sarah2.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah3 Swank3", "sarah3.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah4 Swank4", "sarah4.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah5 Swank5", "sarah5.swank@gmail.com"));
+            users.Add(userInterface.Create("Sarah6 Swank6", "sarah6.swank@gmail.com"));
         }
     }
 
     [Collection("Model")]
     public class PageTests : IClassFixture<PageTestContext>
     {
-        PageTestContext pageTestContext;
+        private PageTestContext pageTestContext;
+        private PageInterface pageInterface = new PageInterface();
 
         public PageTests(PageTestContext ptc)
         {
@@ -47,9 +38,9 @@ namespace WikiTests
         public void CreatePageTest()
         {
             string pageName = "New Page";
-            var page = PageInterface.Create(pageName, pageTestContext.users[0]);
+            var page = pageInterface.Create(pageName, pageTestContext.users[0]);
 
-            var fetched = PageInterface.GetByName(pageName);
+            var fetched = pageInterface.GetByName(pageName);
 
             Assert.NotNull(fetched);
 
@@ -63,9 +54,9 @@ namespace WikiTests
         public void CreatePageTest2()
         {
             string pageName = "New Page";
-            var page = PageInterface.Create(pageName, pageTestContext.users[0]);
+            var page = pageInterface.Create(pageName, pageTestContext.users[0]);
 
-            var fetched = PageInterface.GetById(page.Id);
+            var fetched = pageInterface.GetById(page.Id);
 
             Assert.NotNull(fetched);
 
@@ -79,16 +70,16 @@ namespace WikiTests
         public void DeletePageTest()
         {
             string pageName = "New Page";
-            var page = PageInterface.Create(pageName, pageTestContext.users[0]);
+            var page = pageInterface.Create(pageName, pageTestContext.users[0]);
 
-            var fetched = PageInterface.GetByName(pageName);
+            var fetched = pageInterface.GetByName(pageName);
 
             Assert.NotNull(fetched);
 
-            long count = PageInterface.Delete(page.Id);
+            long count = pageInterface.Delete(page.Id);
             Assert.Equal(1, count);
 
-            fetched = PageInterface.GetByName(pageName);
+            fetched = pageInterface.GetByName(pageName);
             Assert.Null(fetched);
         }
 
@@ -97,21 +88,21 @@ namespace WikiTests
         {
             string pageName = "New Page";
             string pageName2 = "New Page 2";
-            var page = PageInterface.Create(pageName, pageTestContext.users[0]);
-            var page2 = PageInterface.Create(pageName2, pageTestContext.users[0]);
+            var page = pageInterface.Create(pageName, pageTestContext.users[0]);
+            var page2 = pageInterface.Create(pageName2, pageTestContext.users[0]);
 
-            var fetchedPage = PageInterface.GetByName(pageName);
-            var fetchedPage2 = PageInterface.GetByName(pageName2);
+            var fetchedPage = pageInterface.GetByName(pageName);
+            var fetchedPage2 = pageInterface.GetByName(pageName2);
 
             Assert.NotNull(fetchedPage);
             Assert.NotNull(fetchedPage2);
 
-            long count = PageInterface.Delete(page.Id);
+            long count = pageInterface.Delete(page.Id);
             Assert.Equal(1, count);
 
-            fetchedPage = PageInterface.GetByName(pageName);
+            fetchedPage = pageInterface.GetByName(pageName);
             Assert.Null(fetchedPage);
-            fetchedPage2 = PageInterface.GetByName(pageName2);
+            fetchedPage2 = pageInterface.GetByName(pageName2);
             Assert.NotNull(fetchedPage2);
         }
 
@@ -119,17 +110,17 @@ namespace WikiTests
         public void AddPageTest()
         {
             string pageName = "New Page";
-            var page = PageInterface.Create(pageName, pageTestContext.users[0]);
+            var page = pageInterface.Create(pageName, pageTestContext.users[0]);
 
-            var fetched = PageInterface.GetByName(pageName);
+            var fetched = pageInterface.GetByName(pageName);
 
             Assert.NotNull(fetched);
 
             string secondPageName = "Second Page";
 
-            PageInterface.Create(secondPageName, page, pageTestContext.users[1]);
+            pageInterface.Create(secondPageName, page, pageTestContext.users[1]);
 
-            fetched = PageInterface.GetByName(secondPageName);
+            fetched = pageInterface.GetByName(secondPageName);
 
             Assert.NotNull(fetched);
             Assert.Equal(fetched.ParentId, page.Id);
